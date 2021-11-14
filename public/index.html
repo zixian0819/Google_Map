@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    .item {
+      padding: 5px 10px;
+      border: 1px solid #f3f3f3;
+      cursor: pointer;
+    }
+
+    .item:hover {
+      background-color: #f3f3f3;
+    }
+
+    input {
+      padding: 5px 10px;
+      border-radius: 3px;
+      border: 1px solid #ddd;
+    }
+
+    input:focus-visible {
+      outline: #ddd auto 1px;
+    }
+  </style>
+
+</head>
+
+<body>
+  <div id="root">
+    <div style="display: flex;">
+      <div style="flex: 1;"></div>
+      <div>
+        <div style="display: flex;">
+          <iframe width="600" height="450" style="border:1px solid #f9f9f9;" loading="lazy" allowfullscreen :src="url"></iframe>
+          <div style="width: 200px; padding-left: 5px;">
+            <div>
+              <input v-model="keyword" placeholder="Search key" />
+              <div style="padding:5px;font-weight: lighter;">{{currentTitle}}</div>
+            </div>
+            <div>
+              <div v-for="(item,index) in list" :key="index">
+                <div class="item" @click="handleClick(item)"> {{item.title}} </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="flex: 1;"></div>
+    </div>
+  </div>
+</body>
+<script src="https://lib.baomitu.com/vue/2.6.14/vue.min.js"></script>
+<script>
+  new Vue({
+    el: '#root',
+    data: {
+      id: '1234',
+      keyword: '',
+      list: [],
+      currentTitle: '',
+      url: 'https://www.google.com/maps/embed/v1/place?language=en&key=AIzaSyBTbivWepc_7wzbn2_riP975kDvM3WYi5U&q=Atlanta'
+    },
+    watch: {
+      keyword(n, o) {
+        this.init();
+      }
+    },
+    mounted: function () {
+      this.init();
+    },
+    methods: {
+      handleClick(item) {
+        this.currentTitle = item.title;
+        const { place_id, title } = item;
+        this.url = `https://www.google.com/maps/embed/v1/place?q=place_id:${place_id}&language=en&key=AIzaSyBjwvSXNsUqTNk_j4Wt2tbO4GZqcGEzMRk`
+      },
+      init: function () {
+        if (!this.keyword) {
+          this.list = [];
+          return;
+        }
+        if (this.isLoading) {
+          return;
+        }
+
+        this.isLoading = true;
+        fetch('http://127.0.0.1:3100/api?q=' + this.keyword).then((res) => {
+          return res.json()
+        }).then((data) => {
+          this.list = data;
+          this.currentTitle = '';
+        })
+          .finally(() => {
+            this.isLoading = false;
+          })
+      }
+    }
+  })
+</script>
+
+</html>
